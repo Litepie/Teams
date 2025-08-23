@@ -1,0 +1,94 @@
+{
+    "name": "litepie/teams",
+    "description": "A modern, tenant-ready teams management package for Laravel 12+",
+    "type": "library",
+    "keywords": [
+        "laravel",
+        "teams",
+        "collaboration",
+        "multi-tenant",
+        "tenancy",
+        "workflow",
+        "permissions",
+        "roles"
+    ],
+    "homepage": "https://github.com/Litepie/Teams",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Litepie Development Team",
+            "email": "dev@litepie.com",
+            "homepage": "https://litepie.com"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/contracts": "^12.0",
+        "illuminate/database": "^12.0",
+        "illuminate/support": "^12.0",
+        "litepie/tenancy": "^2.0",
+        "litepie/filehub": "^2.0",
+        "litepie/flow": "^2.0",
+        "litepie/actions": "^2.0",
+        "litepie/shield": "^2.0",
+        "litepie/database": "^1.0",
+        "spatie/laravel-activitylog": "^4.8",
+        "spatie/laravel-query-builder": "^5.8"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^9.0",
+        "phpunit/phpunit": "^11.0",
+        "pestphp/pest": "^3.0",
+        "pestphp/pest-plugin-laravel": "^3.0",
+        "nunomaduro/collision": "^8.0",
+        "nunomaduro/larastan": "^2.0",
+        "friendsofphp/php-cs-fixer": "^3.0",
+        "spatie/laravel-ray": "^1.37"
+    },
+    "autoload": {
+        "psr-4": {
+            "Litepie\\Teams\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Litepie\\Teams\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage",
+        "format": "vendor/bin/php-cs-fixer fix --allow-risky=yes",
+        "analyse": "vendor/bin/phpstan analyse",
+        "post-autoload-dump": [
+            "@clear",
+            "@prepare"
+        ],
+        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+        "prepare": "@php vendor/bin/testbench package:discover --ansi",
+        "build": [
+            "@composer validate",
+            "@composer test",
+            "@composer analyse",
+            "@composer format"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Litepie\\Teams\\TeamsServiceProvider"
+            ],
+            "aliases": {
+                "Teams": "Litepie\\Teams\\Facades\\Teams"
+            }
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

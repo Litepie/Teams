@@ -1,0 +1,79 @@
+name: Question or Discussion
+description: Ask a question or start a discussion about the package
+title: "[QUESTION] "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to ask a question! Please provide as much detail as possible.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What would you like to know?
+      placeholder: Describe your question in detail...
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Provide context about what you're trying to achieve
+      placeholder: I'm trying to...
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-implementation
+    attributes:
+      label: Current Implementation
+      description: Show what you've tried so far
+      placeholder: |
+        ```php
+        // Your current code here
+        ```
+      render: php
+
+  - type: checkboxes
+    id: research
+    attributes:
+      label: Research Done
+      description: What have you already checked?
+      options:
+        - label: I have read the documentation
+        - label: I have searched existing issues and discussions
+        - label: I have checked the examples in the repository
+        - label: I have looked at the source code
+
+  - type: dropdown
+    id: php-version
+    attributes:
+      label: PHP Version
+      options:
+        - "8.2"
+        - "8.3"
+        - "8.4"
+
+  - type: dropdown
+    id: laravel-version
+    attributes:
+      label: Laravel Version
+      options:
+        - "12.x"
+        - "11.x"
+        - "Other"
+
+  - type: input
+    id: package-version
+    attributes:
+      label: Package Version
+      placeholder: "e.g., 2.0.0"
+
+  - type: textarea
+    id: additional-info
+    attributes:
+      label: Additional Information
+      description: Any other information that might be helpful
