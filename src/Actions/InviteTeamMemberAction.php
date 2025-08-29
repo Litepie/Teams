@@ -39,58 +39,54 @@ class InviteTeamMemberAction extends StandardAction
     /**
      * Authorize the invitation request.
      */
-    public function authorize(array $data): bool
+    protected function authorize(): void
     {
-        $team = Team::find($data['team_id']);
+        $team = Team::find($this->data['team_id']);
         
         if (!$team) {
-            return false;
+            throw new \Illuminate\Auth\Access\AuthorizationException('Team not found.');
         }
 
         // Check if user has permission to invite team members
         if (!$team->userHasPermission($this->user, 'invite_team_member')) {
-            return false;
+            throw new \Illuminate\Auth\Access\AuthorizationException('You do not have permission to invite team members.');
         }
 
         // Check if team has reached member limit
         if ($team->hasReachedMemberLimit()) {
-            $this->addError('team', 'Team has reached its member limit.');
-            return false;
+            throw new \Illuminate\Auth\Access\AuthorizationException('Team has reached its member limit.');
         }
 
         // Check if invitation already exists for this email
-        $existingInvitation = TeamInvitation::where('team_id', $data['team_id'])
-                                           ->where('email', $data['email'])
+        $existingInvitation = TeamInvitation::where('team_id', $this->data['team_id'])
+                                           ->where('email', $this->data['email'])
                                            ->where('status', 'pending')
                                            ->first();
 
         if ($existingInvitation) {
-            $this->addError('email', 'An invitation for this email already exists.');
-            return false;
+            throw new \Illuminate\Auth\Access\AuthorizationException('An invitation for this email already exists.');
         }
-
-        return true;
     }
 
     /**
-     * Execute the team invitation.
+     * Handle the team invitation.
      */
-    public function execute(array $data): array
+    protected function handle(): array
     {
-        return DB::transaction(function () use ($data) {
-            $team = Team::find($data['team_id']);
+        return DB::transaction(function () {
+            $team = Team::find($this->data['team_id']);
             
             // Create the invitation
             $invitation = TeamInvitation::create([
                 'id' => Str::uuid(),
-                'team_id' => $data['team_id'],
-                'email' => $data['email'],
-                'role' => $data['role'],
-                'permissions' => $data['permissions'] ?? [],
+                'team_id' => $this->data['team_id'],
+                'email' => $this->data['email'],
+                'role' => $this->data['role'],
+                'permissions' => $this->data['permissions'] ?? [],
                 'token' => Str::random(64),
                 'invited_by' => $this->user->id,
-                'expires_at' => $data['expires_at'] ?? now()->addDays(7),
-                'message' => $data['message'] ?? null,
+                'expires_at' => $this->data['expires_at'] ?? now()->addDays(7),
+                'message' => $this->data['message'] ?? null,
                 'status' => 'pending',
             ]);
 
@@ -105,9 +101,9 @@ class InviteTeamMemberAction extends StandardAction
                 ->on($team)
                 ->by($this->user)
                 ->withData([
-                    'invited_email' => $data['email'],
-                    'role' => $data['role'],
-                    'permissions' => $data['permissions'] ?? [],
+                    'invited_email' => $this->data['email'],
+                    'role' => $this->data['role'],
+                    'permissions' => $this->data['permissions'] ?? [],
                 ])
                 ->log('Team invitation sent');
 
@@ -123,11 +119,12 @@ class InviteTeamMemberAction extends StandardAction
     /**
      * Handle any post-execution tasks.
      */
-    public function after(array $result): void
+    protected function after(): void
     {
-        if ($result['success']) {
-            $invitation = $result['invitation'];
-            $team = $result['team'];
+        if ($this->result->isSuccess()) {
+            $resultData = $this->result->getData();
+            $invitation = $resultData['invitation'];
+            $team = $resultData['team'];
 
             // Send invitation email
             $this->executeSubAction('SendInvitationEmailAction', [

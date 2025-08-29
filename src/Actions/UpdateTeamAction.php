@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Litepie\Teams\Actions;
 
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Litepie\Actions\StandardAction;
@@ -36,61 +37,51 @@ class UpdateTeamAction extends StandardAction
         ];
     }
 
-    /**
-     * Authorize the update request.
+        /**
+     * Authorize the team update request.
      */
-    public function authorize(array $data): bool
+    protected function authorize(): void
     {
-        $team = Team::find($data['team_id']);
+        $team = Team::find($this->data['team_id']);
         
         if (!$team) {
-            return false;
+            throw new AuthorizationException('Team not found.');
         }
 
-        // Check if user has permission to update the team
+        // Check if user has permission to update teams
         if (!$team->userHasPermission($this->user, 'update_team')) {
-            return false;
+            throw new AuthorizationException('You do not have permission to update this team.');
         }
 
-        // Validate unique team name if provided
-        if (isset($data['name'])) {
-            $existingTeam = Team::where('name', $data['name'])
-                               ->where('id', '!=', $data['team_id'])
-                               ->tenantScope()
-                               ->first();
-
-            if ($existingTeam) {
-                $this->addError('name', 'A team with this name already exists.');
-                return false;
-            }
+        // Check if the team is in a state that allows updates
+        if (in_array($team->status, ['archived', 'deleted'])) {
+            throw new AuthorizationException('Cannot update teams in archived or deleted state.');
         }
-
-        return true;
     }
 
     /**
-     * Execute the team update.
+     * Handle the team update.
      */
-    public function execute(array $data): array
+    protected function handle(): array
     {
-        return DB::transaction(function () use ($data) {
-            $team = Team::find($data['team_id']);
+        return DB::transaction(function () {
+            $team = Team::find($this->data['team_id']);
             $originalData = $team->toArray();
             
             // Prepare update data
             $updateData = [];
             
-            if (isset($data['name'])) {
-                $updateData['name'] = $data['name'];
-                $updateData['slug'] = str($data['name'])->slug();
+            if (isset($this->data['name'])) {
+                $updateData['name'] = $this->data['name'];
+                $updateData['slug'] = str($this->data['name'])->slug();
             }
             
-            if (isset($data['description'])) {
-                $updateData['description'] = $data['description'];
+            if (isset($this->data['description'])) {
+                $updateData['description'] = $this->data['description'];
             }
             
-            if (isset($data['settings'])) {
-                $updateData['settings'] = array_merge($team->settings ?? [], $data['settings']);
+            if (isset($this->data['settings'])) {
+                $updateData['settings'] = array_merge($team->settings ?? [], $this->data['settings']);
             }
             
             // Update the team
@@ -123,10 +114,11 @@ class UpdateTeamAction extends StandardAction
     /**
      * Handle any post-execution tasks.
      */
-    public function after(array $result): void
+    protected function after(): void
     {
-        if ($result['success']) {
-            $team = $result['team'];
+        if ($this->result->isSuccess()) {
+            $resultData = $this->result->getData();
+            $team = $resultData['team'];
 
             // Send notification to team members about updates
             $this->executeSubAction('NotifyTeamMembersAction', [
@@ -134,12 +126,12 @@ class UpdateTeamAction extends StandardAction
                 'notification_type' => 'team_updated',
                 'data' => [
                     'updated_by' => $this->user->name ?? 'Unknown',
-                    'changes' => $this->getHumanReadableChanges($result),
+                    'changes' => $this->getHumanReadableChanges($resultData),
                 ],
             ]);
 
             // Update search index if team name changed
-            if (isset($result['changes']['name'])) {
+            if (isset($resultData['changes']['name'])) {
                 $this->executeSubAction('UpdateTeamSearchIndexAction', [
                     'team_id' => $team->id,
                 ]);

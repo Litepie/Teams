@@ -34,44 +34,41 @@ class SuspendTeamAction extends StandardAction
     /**
      * Authorize the suspension request.
      */
-    public function authorize(array $data): bool
+    protected function authorize(): void
     {
-        $team = Team::find($data['team_id']);
+        $team = Team::find($this->data['team_id']);
         
         if (!$team) {
-            return false;
+            throw new \Illuminate\Auth\Access\AuthorizationException('Team not found.');
         }
 
         // Check if user has permission to suspend teams
         if (!$this->user->hasPermissionTo('suspend_team', $team)) {
-            return false;
+            throw new \Illuminate\Auth\Access\AuthorizationException('You do not have permission to suspend teams.');
         }
 
         // Team must be active to be suspended
         if ($team->status !== 'active') {
-            $this->addError('team', 'Only active teams can be suspended.');
-            return false;
+            throw new \Illuminate\Auth\Access\AuthorizationException('Only active teams can be suspended.');
         }
-
-        return true;
     }
 
     /**
-     * Execute the team suspension.
+     * Handle the team suspension.
      */
-    public function execute(array $data): array
+    protected function handle(): array
     {
-        return DB::transaction(function () use ($data) {
-            $team = Team::find($data['team_id']);
+        return DB::transaction(function () {
+            $team = Team::find($this->data['team_id']);
             
             // Update team status
             $team->update([
                 'status' => 'suspended',
                 'suspended_at' => now(),
-                'suspended_by' => $data['suspended_by'],
+                'suspended_by' => $this->data['suspended_by'],
                 'settings' => array_merge($team->settings ?? [], [
-                    'suspension_reason' => $data['reason'],
-                    'suspension_until' => $data['suspension_until'] ?? null,
+                    'suspension_reason' => $this->data['reason'],
+                    'suspension_until' => $this->data['suspension_until'] ?? null,
                     'suspension_date' => now()->toISOString(),
                 ])
             ]);
@@ -80,15 +77,15 @@ class SuspendTeamAction extends StandardAction
             Cache::tags(['team:' . $team->id])->flush();
 
             // Fire team suspended event
-            event(new TeamSuspended($team, $this->user, $data['reason']));
+            event(new TeamSuspended($team, $this->user, $this->data['reason']));
 
             // Log the activity
             Logs::activity()
                 ->on($team)
                 ->by($this->user)
                 ->withData([
-                    'reason' => $data['reason'],
-                    'suspension_until' => $data['suspension_until'] ?? null,
+                    'reason' => $this->data['reason'],
+                    'suspension_until' => $this->data['suspension_until'] ?? null,
                     'previous_status' => $team->getOriginal('status'),
                 ])
                 ->log('Team suspended');
@@ -104,10 +101,11 @@ class SuspendTeamAction extends StandardAction
     /**
      * Handle any post-execution tasks.
      */
-    public function after(array $result): void
+    protected function after(): void
     {
-        if ($result['success']) {
-            $team = $result['team'];
+        if ($this->result->isSuccess()) {
+            $resultData = $this->result->getData();
+            $team = $resultData['team'];
 
             // Send notifications to team members about suspension
             $this->executeSubAction('NotifyTeamMembersAction', [

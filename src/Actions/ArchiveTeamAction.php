@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Litepie\Teams\Actions;
 
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Litepie\Actions\StandardAction;
@@ -34,44 +35,41 @@ class ArchiveTeamAction extends StandardAction
     /**
      * Authorize the archival request.
      */
-    public function authorize(array $data): bool
+    protected function authorize(): void
     {
-        $team = Team::find($data['team_id']);
+        $team = Team::find($this->data['team_id']);
         
         if (!$team) {
-            return false;
+            throw new AuthorizationException('Team not found.');
         }
 
         // Check if user has permission to archive teams
         if (!$this->user->hasPermissionTo('archive_team', $team)) {
-            return false;
+            throw new AuthorizationException('You do not have permission to archive teams.');
         }
 
         // Team must be active or suspended to be archived
         if (!in_array($team->status, ['active', 'suspended'])) {
-            $this->addError('team', 'Team cannot be archived from its current state.');
-            return false;
+            throw new AuthorizationException('Team cannot be archived from its current state.');
         }
-
-        return true;
     }
 
     /**
-     * Execute the team archival.
+     * Handle the team archival.
      */
-    public function execute(array $data): array
+    protected function handle(): array
     {
-        return DB::transaction(function () use ($data) {
-            $team = Team::find($data['team_id']);
-            $preserveData = $data['preserve_data'] ?? true;
+        return DB::transaction(function () {
+            $team = Team::find($this->data['team_id']);
+            $preserveData = $this->data['preserve_data'] ?? true;
             
             // Update team status
             $team->update([
                 'status' => 'archived',
                 'archived_at' => now(),
-                'archived_by' => $data['archived_by'],
+                'archived_by' => $this->data['archived_by'],
                 'settings' => array_merge($team->settings ?? [], [
-                    'archive_reason' => $data['reason'],
+                    'archive_reason' => $this->data['reason'],
                     'archive_date' => now()->toISOString(),
                     'preserve_data' => $preserveData,
                 ])
@@ -89,14 +87,14 @@ class ArchiveTeamAction extends StandardAction
             Cache::tags(['team:' . $team->id])->flush();
 
             // Fire team archived event
-            event(new TeamArchived($team, $this->user, $data['reason']));
+            event(new TeamArchived($team, $this->user, $this->data['reason']));
 
             // Log the activity
             Logs::activity()
                 ->on($team)
                 ->by($this->user)
                 ->withData([
-                    'reason' => $data['reason'],
+                    'reason' => $this->data['reason'],
                     'preserve_data' => $preserveData,
                     'previous_status' => $team->getOriginal('status'),
                 ])
@@ -113,10 +111,11 @@ class ArchiveTeamAction extends StandardAction
     /**
      * Handle any post-execution tasks.
      */
-    public function after(array $result): void
+    protected function after(): void
     {
-        if ($result['success']) {
-            $team = $result['team'];
+        if ($this->result->isSuccess()) {
+            $resultData = $this->result->getData();
+            $team = $resultData['team'];
 
             // Send notifications to team members about archival
             $this->executeSubAction('NotifyTeamMembersAction', [

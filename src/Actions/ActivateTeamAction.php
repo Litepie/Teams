@@ -33,43 +33,40 @@ class ActivateTeamAction extends StandardAction
     /**
      * Authorize the activation request.
      */
-    public function authorize(array $data): bool
+    protected function authorize(): void
     {
-        $team = Team::find($data['team_id']);
+        $team = Team::find($this->data['team_id']);
         
         if (!$team) {
-            return false;
+            throw new \Illuminate\Auth\Access\AuthorizationException('Team not found.');
         }
 
         // Check if user has permission to activate teams
         if (!$this->user->hasPermissionTo('activate_team', $team)) {
-            return false;
+            throw new \Illuminate\Auth\Access\AuthorizationException('You do not have permission to activate teams.');
         }
 
         // Team must be in draft or suspended state to be activated
         if (!in_array($team->status, ['draft', 'suspended'])) {
-            $this->addError('team', 'Team cannot be activated from its current state.');
-            return false;
+            throw new \Illuminate\Auth\Access\AuthorizationException('Team cannot be activated from its current state.');
         }
-
-        return true;
     }
 
     /**
-     * Execute the team activation.
+     * Handle the team activation.
      */
-    public function execute(array $data): array
+    protected function handle(): array
     {
-        return DB::transaction(function () use ($data) {
-            $team = Team::find($data['team_id']);
+        return DB::transaction(function () {
+            $team = Team::find($this->data['team_id']);
             
             // Update team status
             $team->update([
                 'status' => 'active',
                 'activated_at' => now(),
-                'activated_by' => $data['activated_by'],
+                'activated_by' => $this->data['activated_by'],
                 'settings' => array_merge($team->settings ?? [], [
-                    'activation_notes' => $data['notes'] ?? null,
+                    'activation_notes' => $this->data['notes'] ?? null,
                     'activation_date' => now()->toISOString(),
                 ])
             ]);
@@ -85,7 +82,7 @@ class ActivateTeamAction extends StandardAction
                 ->on($team)
                 ->by($this->user)
                 ->withData([
-                    'notes' => $data['notes'] ?? null,
+                    'notes' => $this->data['notes'] ?? null,
                     'previous_status' => $team->getOriginal('status'),
                 ])
                 ->log('Team activated');
@@ -101,10 +98,11 @@ class ActivateTeamAction extends StandardAction
     /**
      * Handle any post-execution tasks.
      */
-    public function after(array $result): void
+    protected function after(): void
     {
-        if ($result['success']) {
-            $team = $result['team'];
+        if ($this->result->isSuccess()) {
+            $resultData = $this->result->getData();
+            $team = $resultData['team'];
 
             // Send notifications to team members about activation
             $this->executeSubAction('NotifyTeamMembersAction', [

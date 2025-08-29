@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Litepie\Teams\Actions;
 
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Litepie\Actions\StandardAction;
@@ -33,45 +34,42 @@ class RestoreTeamAction extends StandardAction
     /**
      * Authorize the restoration request.
      */
-    public function authorize(array $data): bool
+    protected function authorize(): void
     {
-        $team = Team::find($data['team_id']);
+        $team = Team::find($this->data['team_id']);
         
         if (!$team) {
-            return false;
+            throw new AuthorizationException('Team not found.');
         }
 
         // Check if user has permission to restore teams
         if (!$this->user->hasPermissionTo('restore_team', $team)) {
-            return false;
+            throw new AuthorizationException('You do not have permission to restore teams.');
         }
 
-        // Team must be archived to be restored
-        if ($team->status !== 'archived') {
-            $this->addError('team', 'Only archived teams can be restored.');
-            return false;
+        // Team must be archived or suspended to be restored
+        if (!in_array($team->status, ['archived', 'suspended'])) {
+            throw new AuthorizationException('Team cannot be restored from its current state.');
         }
-
-        return true;
     }
 
     /**
-     * Execute the team restoration.
+     * Handle the team restoration.
      */
-    public function execute(array $data): array
+    protected function handle(): array
     {
-        return DB::transaction(function () use ($data) {
-            $team = Team::find($data['team_id']);
+        return DB::transaction(function () {
+            $team = Team::find($this->data['team_id']);
             
             // Update team status
             $team->update([
                 'status' => 'active',
                 'restored_at' => now(),
-                'restored_by' => $data['restored_by'],
+                'restored_by' => $this->data['restored_by'],
                 'archived_at' => null,
                 'archived_by' => null,
                 'settings' => array_merge($team->settings ?? [], [
-                    'restoration_notes' => $data['notes'] ?? null,
+                    'restoration_notes' => $this->data['notes'] ?? null,
                     'restoration_date' => now()->toISOString(),
                 ])
             ]);
@@ -111,10 +109,11 @@ class RestoreTeamAction extends StandardAction
     /**
      * Handle any post-execution tasks.
      */
-    public function after(array $result): void
+    protected function after(): void
     {
-        if ($result['success']) {
-            $team = $result['team'];
+        if ($this->result->isSuccess()) {
+            $resultData = $this->result->getData();
+            $team = $resultData['team'];
 
             // Send notifications to team members about restoration
             $this->executeSubAction('NotifyTeamMembersAction', [
