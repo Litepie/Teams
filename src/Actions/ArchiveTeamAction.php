@@ -7,6 +7,7 @@ namespace Litepie\Teams\Actions;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Litepie\Actions\StandardAction;
+use Litepie\Logs\Facades\Logs;
 use Litepie\Teams\Events\TeamArchived;
 use Litepie\Teams\Models\Team;
 
@@ -91,10 +92,10 @@ class ArchiveTeamAction extends StandardAction
             event(new TeamArchived($team, $this->user, $data['reason']));
 
             // Log the activity
-            activity()
-                ->performedOn($team)
-                ->causedBy($this->user)
-                ->withProperties([
+            Logs::activity()
+                ->on($team)
+                ->by($this->user)
+                ->withData([
                     'reason' => $data['reason'],
                     'preserve_data' => $preserveData,
                     'previous_status' => $team->getOriginal('status'),

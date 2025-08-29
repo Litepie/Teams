@@ -6,7 +6,7 @@ return [
     | Teams Configuration
     |--------------------------------------------------------------------------
     |
-    | This file contains the configuration options for the Litepie Teams
+    | This file contains the configuration options for the Lavalite Teams
     | package. You can customize various aspects of team management,
     | permissions, workflows, and integrations.
     |

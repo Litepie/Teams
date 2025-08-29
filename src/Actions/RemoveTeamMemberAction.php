@@ -7,6 +7,7 @@ namespace Litepie\Teams\Actions;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Litepie\Actions\StandardAction;
+use Litepie\Logs\Facades\Logs;
 use Litepie\Teams\Events\TeamMemberRemoved;
 use Litepie\Teams\Models\Team;
 use Litepie\Teams\Models\TeamMember;
@@ -111,10 +112,10 @@ class RemoveTeamMemberAction extends StandardAction
             event(new TeamMemberRemoved($team, $member, $this->user));
 
             // Log the activity
-            activity()
-                ->performedOn($team)
-                ->causedBy($this->user)
-                ->withProperties([
+            Logs::activity()
+                ->on($team)
+                ->by($this->user)
+                ->withData([
                     'removed_user_id' => $data['user_id'],
                     'reason' => $data['reason'] ?? null,
                     'transfer_ownership' => $data['transfer_ownership'] ?? false,

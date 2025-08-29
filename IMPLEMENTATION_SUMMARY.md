@@ -1,8 +1,8 @@
-# Litepie Teams Package - Implementation Summary
+# Lavalite Teams Package - Implementation Summary
 
 ## Package Overview
 
-The Litepie Teams package has been successfully created as a modern, feature-rich Laravel 12 package with comprehensive multi-tenant support and integration with the Litepie ecosystem.
+The Lavalite Teams package has been successfully created as a modern, feature-rich Laravel 12 package with comprehensive multi-tenant support and integration with the Litepie ecosystem.
 
 ## ✅ Completed Components
 
@@ -249,7 +249,7 @@ $result = app(ActivateTeamAction::class)
 
 ## 🎉 Ready for Production
 
-The Litepie Teams package is now complete and production-ready with:
+The Lavalite Teams package is now complete and production-ready with:
 
 - ✅ Full Laravel 12 compatibility
 - ✅ Comprehensive multi-tenant support

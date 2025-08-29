@@ -7,6 +7,7 @@ namespace Litepie\Teams\Actions;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Litepie\Actions\StandardAction;
+use Litepie\Logs\Facades\Logs;
 use Litepie\Teams\Events\TeamUpdated;
 use Litepie\Teams\Models\Team;
 
@@ -102,10 +103,10 @@ class UpdateTeamAction extends StandardAction
             event(new TeamUpdated($team, $originalData, $this->user));
 
             // Log the activity
-            activity()
-                ->performedOn($team)
-                ->causedBy($this->user)
-                ->withProperties([
+            Logs::activity()
+                ->on($team)
+                ->by($this->user)
+                ->withData([
                     'changes' => $updateData,
                     'original' => $originalData,
                 ])

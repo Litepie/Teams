@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Litepie\Actions\StandardAction;
+use Litepie\Logs\Facades\Logs;
 use Litepie\Teams\Events\TeamInvitationSent;
 use Litepie\Teams\Models\Team;
 use Litepie\Teams\Models\TeamInvitation;
@@ -100,10 +101,10 @@ class InviteTeamMemberAction extends StandardAction
             event(new TeamInvitationSent($invitation, $team, $this->user));
 
             // Log the activity
-            activity()
-                ->performedOn($team)
-                ->causedBy($this->user)
-                ->withProperties([
+            Logs::activity()
+                ->on($team)
+                ->by($this->user)
+                ->withData([
                     'invited_email' => $data['email'],
                     'role' => $data['role'],
                     'permissions' => $data['permissions'] ?? [],

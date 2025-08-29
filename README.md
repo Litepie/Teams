@@ -1,4 +1,4 @@
-# Litepie Teams 🚀
+# Lavalite Teams 🚀
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/litepie/teams.svg?style=flat-square)](https://packagist.org/packages/litepie/teams)
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/litepie/teams/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/litepie/teams/actions?query=workflow%3Arun-tests+branch%3Amain)
@@ -384,7 +384,7 @@ BulkTeamOperationsAction::execute($team, [
 
 ## 🗺️ Roadmap
 
-We're continuously improving Litepie Teams. Here's what's coming next:
+We're continuously improving Lavalite Teams. Here's what's coming next:
 
 ### 🚀 Upcoming Features (v2.1)
 - [ ] Team templates and blueprints
@@ -509,7 +509,7 @@ This project is maintained by [Renfos Technologies](https://renfos.com) and supp
 
 **Built with ❤️ by the [Renfos Technologies](https://renfos.com) Team**
 
-*Litepie Teams - Where collaboration meets innovation.*
+*Lavalite Teams - Where collaboration meets innovation.*
 
 [⭐ Star us on GitHub](https://github.com/litepie/teams) | [🐦 Follow us on Twitter](https://twitter.com/litepie) | [💼 Visit Renfos](https://renfos.com)
 

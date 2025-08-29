@@ -1,6 +1,6 @@
-# Contributing to Litepie Teams
+# Contributing to Lavalite Teams
 
-Thank you for considering contributing to Litepie Teams! We welcome contributions from everyone and are grateful for even the smallest of improvements.
+Thank you for considering contributing to Lavalite Teams! We welcome contributions from everyone and are grateful for even the smallest of improvements.
 
 ## 🤝 Code of Conduct
 
@@ -346,4 +346,4 @@ Contributors will be:
 - Mentioned in release notes for significant contributions
 - Invited to join our contributors team (for regular contributors)
 
-Thank you for making Litepie Teams better! 🚀
+Thank you for making Lavalite Teams better! 🚀

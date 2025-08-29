@@ -2,7 +2,7 @@
 
 ## 🔒 Supported Versions
 
-We actively support the following versions of Litepie Teams:
+We actively support the following versions of Lavalite Teams:
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -11,7 +11,7 @@ We actively support the following versions of Litepie Teams:
 
 ## 🚨 Reporting a Vulnerability
 
-We take security vulnerabilities seriously. If you discover a security vulnerability within Litepie Teams, please follow these steps:
+We take security vulnerabilities seriously. If you discover a security vulnerability within Lavalite Teams, please follow these steps:
 
 ### 1. **Do NOT** create a public issue
 Please do not report security vulnerabilities through public GitHub issues, discussions, or pull requests.
@@ -20,8 +20,8 @@ Please do not report security vulnerabilities through public GitHub issues, disc
 Send an email to **security@renfos.com** with the following information:
 
 #### Required Information
-- **Subject:** `[SECURITY] Litepie Teams - Brief Description`
-- **Affected Package:** Litepie Teams
+- **Subject:** `[SECURITY] Lavalite Teams - Brief Description`
+- **Affected Package:** Lavalite Teams
 - **Version:** The version(s) affected
 - **Vulnerability Type:** (e.g., SQL Injection, XSS, Authentication Bypass)
 - **Severity Assessment:** Critical, High, Medium, or Low
@@ -116,7 +116,7 @@ We believe in responsible disclosure and will:
 
 ## 📋 Security Checklist
 
-Before deploying Litepie Teams:
+Before deploying Lavalite Teams:
 
 - [ ] All dependencies are up to date
 - [ ] Security configuration is properly set
@@ -155,4 +155,4 @@ Before deploying Litepie Teams:
 
 ---
 
-Thank you for helping keep Litepie Teams and our users safe! 🙏
+Thank you for helping keep Lavalite Teams and our users safe! 🙏

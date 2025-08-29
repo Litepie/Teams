@@ -7,6 +7,7 @@ namespace Litepie\Teams\Actions;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Litepie\Actions\StandardAction;
+use Litepie\Logs\Facades\Logs;
 use Litepie\Teams\Events\TeamSuspended;
 use Litepie\Teams\Models\Team;
 
@@ -82,10 +83,10 @@ class SuspendTeamAction extends StandardAction
             event(new TeamSuspended($team, $this->user, $data['reason']));
 
             // Log the activity
-            activity()
-                ->performedOn($team)
-                ->causedBy($this->user)
-                ->withProperties([
+            Logs::activity()
+                ->on($team)
+                ->by($this->user)
+                ->withData([
                     'reason' => $data['reason'],
                     'suspension_until' => $data['suspension_until'] ?? null,
                     'previous_status' => $team->getOriginal('status'),
