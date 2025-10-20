@@ -30,7 +30,6 @@
         "litepie/filehub": "^1.0",
         "litepie/flow": "^1.0",
         "litepie/actions": "^1.0",
-        "litepie/shield": "^1.0",
         "litepie/database": "^1.0",
         "litepie/logs": "^1.0"
     },

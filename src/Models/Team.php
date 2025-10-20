@@ -16,7 +16,6 @@ use Litepie\Actions\Traits\Actionable;
 use Litepie\Database\Traits\Sluggable;
 use Litepie\FileHub\Traits\HasFileAttachments;
 use Litepie\Flow\Traits\HasWorkflow;
-use Litepie\Shield\Traits\HasRoles;
 use Litepie\Tenancy\Traits\BelongsToTenant;
 
 /**
@@ -60,7 +59,6 @@ class Team extends Model
     use HasWorkflow;
     use Actionable;
     use HasFileAttachments;
-    use HasRoles;
 
     /**
      * The table associated with the model.

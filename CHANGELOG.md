@@ -93,7 +93,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 - **Policy-based Authorization** with TeamPolicy
-- **Activity Logging** with Litepie Shield integration
+- **Activity Logging** with comprehensive audit trails
 - **Input Sanitization** and validation
 - **CSRF Protection** on all forms
 - **Rate Limiting** on sensitive operations
@@ -137,7 +137,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `litepie/actions: ^2.0`
 - `litepie/flow: ^2.0`
 - `litepie/filehub: ^2.0`
-- `litepie/shield: ^2.0`
+- `litepie/tenancy: ^1.0`
+- `litepie/flow: ^1.0`
+- `litepie/filehub: ^1.0`
+- `litepie/actions: ^1.0`
 
 ## [1.x] - Legacy Version
 

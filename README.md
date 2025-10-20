@@ -14,7 +14,7 @@ A modern, tenant-ready teams management package for Laravel 12+ applications. Bu
 
 - 🏢 **Multi-Tenant Ready**: Complete tenant isolation with [Litepie Tenancy](https://github.com/Litepie/Tenancy)
 - 👥 **Team Management**: Create, manage, and organize teams with hierarchical structures
-- 🛡️ **Role-Based Access**: Integration with [Litepie Shield](https://github.com/Litepie/Shield) for granular permissions
+- � **Role-Based Access**: Built-in role and permission management system
 - 🔄 **Workflow Integration**: Team workflows with [Litepie Flow](https://github.com/Litepie/Flow)
 - ⚡ **Action Pattern**: Built on [Litepie Actions](https://github.com/Litepie/Actions) for clean business logic
 - 📁 **File Management**: Team file sharing with [Litepie Filehub](https://github.com/Litepie/Filehub)
@@ -198,32 +198,29 @@ if ($team->getCurrentState()->getName() === 'active') {
 }
 ```
 
-## 🛡️ Permissions & Roles
+## � Permissions & Roles
 
-Teams integrates with Litepie Shield for comprehensive permission management:
+Teams provides a built-in role and permission management system:
 
 ```php
 // Team-level permissions
-$user->givePermissionTo('manage_team_members', $team);
-$user->hasPermissionTo('edit_team_settings', $team);
-
-// Role-based team access
-$team->assignMemberRole($user, 'admin');
-$team->assignMemberRole($user, 'member');
+$team->addMember($user, 'admin');
+$team->addMember($user, 'member');
 
 // Check team-specific permissions
-if ($user->can('manage', $team)) {
-    // User can manage this team
+if ($team->userHasRole($user, 'admin')) {
+    // User is an admin of this team
 }
 
-// Blade directives for teams
-@teamPermission('edit_settings', $team)
-    <button>Edit Team Settings</button>
-@endteamPermission
+if ($team->userHasPermission($user, 'edit_team_settings')) {
+    // User can edit team settings
+}
 
-@teamRole('admin', $team)
-    <div class="admin-panel">Admin Controls</div>
-@endteamRole
+// Update member role
+$team->updateMemberRole($user, 'moderator');
+
+// Update member permissions
+$team->updateMemberPermissions($user, ['edit_content', 'manage_files']);
 ```
 
 ## 📁 File Management

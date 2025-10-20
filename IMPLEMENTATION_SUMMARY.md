@@ -70,7 +70,7 @@ The Lavalite Teams package has been successfully created as a modern, feature-ri
 - Event-driven workflow actions
 
 ### Role-Based Access Control
-- Integration with Litepie Shield
+- Built-in role and permission management
 - Granular permission system
 - Role-based member management
 - Owner, admin, manager, member roles
@@ -117,7 +117,7 @@ The Lavalite Teams package has been successfully created as a modern, feature-ri
 
 ### Integration Settings
 - Tenant configuration
-- Shield permissions
+- Built-in permissions
 - Flow workflows
 - Filehub storage
 - Email templates
@@ -193,10 +193,10 @@ $result = app(ActivateTeamAction::class)
 - Multi-database support
 - Tenant-aware routing
 
-### Litepie Shield
-- Permission management
-- Role assignments
-- Security policies
+### Built-in Permission System
+- Role management
+- Permission control
+- Access policies
 
 ### Litepie Flow
 - Workflow states
