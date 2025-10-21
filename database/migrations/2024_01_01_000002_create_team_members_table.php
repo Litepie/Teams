@@ -15,8 +15,9 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('team_id');
             
-            // User (polymorphic)
-            $table->uuidMorphs('user');
+            // User (polymorphic) - explicitly defined to avoid naming conflicts
+            $table->uuid('user_id')->nullable();
+            $table->string('user_type')->nullable();
             
             // Role and permissions
             $table->string('role', 50)->default('member');
@@ -28,21 +29,26 @@ return new class extends Migration
             $table->timestamp('last_activity_at')->nullable();
             
             // Multi-tenant support
-            $table->uuid('tenant_id')->nullable()->index();
+            $table->uuid('tenant_id')->nullable();
             
             $table->timestamps();
             $table->softDeletes();
             
-            // Indexes
-            $table->foreign('team_id')->references('id')->on('teams')->onDelete('cascade');
-            $table->index(['tenant_id', 'status']);
-            $table->index(['user_type', 'user_id']);
-            $table->index(['team_id', 'role']);
-            $table->index('joined_at');
-            $table->index('last_activity_at');
+            // Foreign Keys
+            $table->foreign('team_id', 'team_members_team_id_fk')->references('id')->on('teams')->onDelete('cascade');
+            
+            // Explicit indexes with globally unique names
+            $table->index('tenant_id', 'team_members_tenant_id_idx');
+            $table->index(['tenant_id', 'status'], 'team_members_tenant_status_idx');
+            $table->index(['user_type', 'user_id'], 'team_members_user_morph_idx');
+            $table->index(['team_id', 'role'], 'team_members_team_role_idx');
+            $table->index('joined_at', 'team_members_joined_at_idx');
+            $table->index('last_activity_at', 'team_members_last_activity_idx');
+            $table->index('status', 'team_members_status_idx');
+            $table->index('role', 'team_members_role_idx');
             
             // Unique constraint to prevent duplicate memberships
-            $table->unique(['team_id', 'user_id', 'user_type'], 'unique_team_user_membership');
+            $table->unique(['team_id', 'user_id', 'user_type'], 'team_members_unique_membership_idx');
         });
     }
 
